@@ -1,24 +1,62 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BiSearchAlt } from "react-icons/bi";
-import {AiOutlinePlusCircle} from 'react-icons/ai';
+import { AiOutlinePlusCircle } from "react-icons/ai";
+import { RiCloseCircleLine } from "react-icons/ri";
 import { Link } from "react-router-dom";
-import dummyNotes from '../dummy_notes.js';
-import NoteItem from "../components/NoteItem.jsx";
+import NoteItem from "../components/layout/NoteItem.jsx";
 
-const Notes = () => {
+const Notes = ({ notes }) => {
+  const [showSearch, setShowSearch] = useState(false);
+  const [text, setText] = useState("");
+  const [filteredNotes, setFilteredNotes] = useState(notes);
+
+  const handleSearch = () => {
+    setFilteredNotes(
+      notes.filter((note) => {
+        if (note.title.toLowerCase().match(text.toLowerCase())) {
+          return note;
+        }
+        return null;
+      })
+    );
+  };
+
+  // Fungsi handleSearch akan berjalan ketika text diisi
+  useEffect(handleSearch, [text]);
+
   return (
     <section>
       <header className="notes__header">
-        <h2>Notes Notsan</h2>
-        {/* <input type="text" placeholder="Input text..." autoFocus /> */}
-        <button className="btn"><BiSearchAlt /></button>
+        {!showSearch ? <h2>Notes Notsan</h2> : ""}
+        {showSearch ? (
+          <input
+            type="text"
+            placeholder="Input title..."
+            autoFocus
+            onChange={(e) => {
+              setText(e.target.value);
+              handleSearch();
+            }}
+            value={text}
+          />
+        ) : (
+          ""
+        )}
+        <button
+          className="btn"
+          onClick={() => setShowSearch((prevState) => !prevState)}
+        >
+          {showSearch ? <RiCloseCircleLine /> : <BiSearchAlt />}
+        </button>
       </header>
       <div className="notes__container">
-        {
-          dummyNotes.map((note) => <NoteItem key={note.id} note={note} />)
-        }
+        {filteredNotes.map((note) => (
+          <NoteItem key={note.id} note={note} />
+        ))}
       </div>
-      <Link className="btn add__btn"><AiOutlinePlusCircle /></Link>
+      <Link className="btn add__btn" to="/create">
+        <AiOutlinePlusCircle />
+      </Link>
     </section>
   );
 };
